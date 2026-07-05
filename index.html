@@ -153,7 +153,7 @@ async function verifyAndCredit(buyer1winId, coins, tx_ref) {
         localStorage.removeItem("lastPayment");
         document.getElementById("depositStatus").innerHTML = "";
         toast(`✅ +${coins} Coins Credited! Check your bot balance.`);
-        setTimeout(() => { window.location.href = "main.html"; }, 2500);
+        setTimeout(() => { window.location.href = "index.html"; }, 2500);
     } else {
         document.getElementById("depositStatus").innerHTML = "";
         toast(`❌ ${result.message || result.error || "Crediting failed. Contact support."}`);
