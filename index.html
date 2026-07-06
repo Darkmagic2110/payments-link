@@ -14,13 +14,21 @@ h1 {font-family: 'UnifrakturCook', cursive;font-size: 38px;color: #ff1a1a;margin
 .input-group {margin: 15px 0;text-align: left;width: 92%;margin-left: auto;margin-right: auto;}
 label {font-size: 14px;color: #aaa;margin-bottom: 5px;display: block;}
 .warn-text {font-size: 12px;color: #ffdd00;margin-top: -8px;margin-bottom: 8px;display: block;}
-select, input[type="number"], input[type="text"] {width: 100%;padding: 14px;font-size: 16px;border-radius: 10px;border: 2px solid #333;background: #111;color: white;box-sizing: border-box;}
-select {appearance: none; -webkit-appearance: none; -moz-appearance: none;}
+input[type="number"], input[type="text"] {width: 100%;padding: 14px;font-size: 16px;border-radius: 10px;border: 2px solid #333;background: #111;color: white;box-sizing: border-box;}
 .glass-btn {width: 92%;padding: 15px;background: rgba(255, 0, 0, 0.15);backdrop-filter: blur(12px);border: 1px solid rgba(255, 0, 0, 0.4);font-size: 18px;color: #ffffff;font-weight: 700;border-radius: 15px;margin-top: 15px;cursor: pointer;box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);}
 #toast {visibility: hidden;min-width: 260px;background-color: #ff1a1a;color: white;text-align: center;border-radius: 12px;padding: 14px;position: fixed;bottom: 30px;left: 50%;transform: translateX(-50%);font-size: 16px;font-weight: 600;z-index: 99999;opacity: 0;transition: opacity 0.3s;}
 #toast.show {visibility: visible;opacity: 1;bottom: 50px;}
 #coinRate {font-size: 15px;color: #00e5ff;margin-top: 8px;font-weight: 600;}
 #depositStatus {margin-top: 12px;font-size: 15px;font-weight: 600;color: #00e5ff;}
+
+/* CUSTOM DROPDOWN */
+.country-wrapper {position: relative;}
+#countryDisplay {width: 100%;padding: 14px;font-size: 16px;border-radius: 10px;border: 2px solid #333;background: #111;color: white;box-sizing: border-box;cursor: pointer;text-align: left;}
+#countryDropdown {display: none;position: absolute;top: 100%;left: 0;right: 0;background: #111;border: 2px solid #333;border-radius: 10px;margin-top: 5px;z-index: 1000;max-height: 250px;overflow-y: auto;}
+#countrySearch {width: 100%;padding: 12px;font-size: 15px;border: none;border-bottom: 1px solid #333;background: #000;color: white;box-sizing: border-box;border-radius: 10px 10px 0 0;outline: none;}
+.country-option {padding: 12px 14px;cursor: pointer;color: white;text-align: left;}
+.country-option:hover {background: rgba(255,0,0,0.15);}
+.country-option.hidden {display: none;}
 </style>
 </head>
 <body>
@@ -36,8 +44,13 @@ select {appearance: none; -webkit-appearance: none; -moz-appearance: none;}
 
 <div class="input-group">
     <label>Select Your African Country</label>
-    <input list="countryList" id="countrySelect" placeholder="-- Search and Select Country --" />
-    <datalist id="countryList"></datalist>
+    <div class="country-wrapper">
+        <div id="countryDisplay">-- Search and Select Country --</div>
+        <div id="countryDropdown">
+            <input type="text" id="countrySearch" placeholder="Search country..." />
+            <div id="countryOptions"></div>
+        </div>
+    </div>
 </div>
 
 <div class="input-group">
@@ -61,8 +74,10 @@ const firebaseConfig = {apiKey: "AIzaSyDvFDByPPo9zgwKLdPaREz1OVMQCXmPfrs",authDo
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-const countrySelect = document.getElementById("countrySelect");
-const countryList = document.getElementById("countryList");
+const countryDisplay = document.getElementById("countryDisplay");
+const countryDropdown = document.getElementById("countryDropdown");
+const countrySearch = document.getElementById("countrySearch");
+const countryOptions = document.getElementById("countryOptions");
 const depositInput = document.getElementById("depositAmount");
 const amountLabel = document.getElementById("amountLabel");
 const coinRate = document.getElementById("coinRate");
@@ -84,11 +99,14 @@ const AFRICAN_RATES = {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
+    // Build country list
     Object.keys(AFRICAN_RATES).forEach(code => {
-        const opt = document.createElement("option");
-        opt.value = AFRICAN_RATES[code].name;
-        opt.setAttribute("data-code", code);
-        countryList.appendChild(opt);
+        const div = document.createElement("div");
+        div.className = "country-option";
+        div.setAttribute("data-code", code);
+        div.textContent = AFRICAN_RATES[code].name;
+        div.onclick = () => selectCountry(code, AFRICAN_RATES[code].name);
+        countryOptions.appendChild(div);
     });
 
     const savedId = localStorage.getItem("onewinId");
@@ -99,31 +117,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function toast(msg) {const t = document.getElementById("toast");t.innerHTML = msg;t.className = "show";setTimeout(() => t.className = "", 3500);}
 
-countrySelect.oninput = () => {
-    const val = countrySelect.value;
-    const option = Array.from(countryList.options).find(opt => opt.value === val);
-    selectedCountry = option? option.getAttribute("data-code") : "";
+// Open/Close dropdown
+countryDisplay.onclick = () => {
+    countryDropdown.style.display = countryDropdown.style.display === "block"? "none" : "block";
+    if(countryDropdown.style.display === "block") countrySearch.focus();
+}
+document.addEventListener("click", (e) => {
+    if(!e.target.closest(".country-wrapper")) countryDropdown.style.display = "none";
+})
 
-    if(!selectedCountry) {
-        coinRate.innerHTML = "";
-        depositInput.placeholder = "Select country first";
-        amountLabel.innerHTML = `Enter Deposit Amount`;
-        return;
-    }
+// Search filter
+countrySearch.oninput = () => {
+    const filter = countrySearch.value.toLowerCase();
+    document.querySelectorAll(".country-option").forEach(opt => {
+        opt.classList.toggle("hidden",!opt.textContent.toLowerCase().includes(filter));
+    })
+}
+
+function selectCountry(code, name) {
+    selectedCountry = code;
+    countryDisplay.textContent = name;
+    countryDropdown.style.display = "none";
+    countrySearch.value = "";
 
     const c = AFRICAN_RATES[selectedCountry];
-    if(!c) {
-        toast("Invalid country selected");
-        return;
-    }
-
     const coinPrice = Math.ceil(c.minAmount / c.coins);
     amountLabel.innerHTML = `Enter Deposit Amount (${c.symbol})`;
     depositInput.placeholder = `Min ${c.symbol}${c.minAmount}`;
     depositInput.min = c.minAmount;
     depositInput.value = "";
     coinRate.innerHTML = `${c.symbol}${coinPrice} = 1 Coin | Min Deposit: ${c.symbol}${c.minAmount} = ${c.coins} Coins`;
-};
+}
 
 function validateAmount(amount, countryCode) {
     const c = AFRICAN_RATES[countryCode];
