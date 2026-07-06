@@ -29,16 +29,15 @@ select {appearance: none; -webkit-appearance: none; -moz-appearance: none;}
 <p class="subtitle">Power up your Dark Magic Ai Bot</p>
 
 <div class="input-group">
-    <label>Enter Your 1Win ID <span style="color:#ff1a1a;">*Required</span></label>
+    <label>Enter your 1WIN ID <span style="color:#ff1a1a;">*Required</span></label>
     <span class="warn-text">⚠️ Note: Your 1Win ID only links you to the bot. Depositing here will NOT reflect in your 1Win account. Double check your ID, coins can be lost if wrong.</span>
-    <input type="text" id="onewinIdInput" placeholder="Enter numbers only" />
+    <input type="text" id="onewinIdInput" placeholder="Enter your 1WIN ID" inputmode="numeric" pattern="[0-9]*" />
 </div>
 
 <div class="input-group">
     <label>Select Your African Country</label>
-    <select id="countrySelect">
-        <option value="">-- Choose Country --</option>
-    </select>
+    <input list="countryList" id="countrySelect" placeholder="-- Search and Select Country --" />
+    <datalist id="countryList"></datalist>
 </div>
 
 <div class="input-group">
@@ -63,6 +62,7 @@ if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 const countrySelect = document.getElementById("countrySelect");
+const countryList = document.getElementById("countryList");
 const depositInput = document.getElementById("depositAmount");
 const amountLabel = document.getElementById("amountLabel");
 const coinRate = document.getElementById("coinRate");
@@ -78,17 +78,17 @@ const AFRICAN_RATES = {
     "TZ": {name: "Tanzania 🇹🇿", currency: "TZS", symbol: "TSh", rate: 45, flutterwave: "TZS", minAmount: 2500, coins: 5},
     "CM": {name: "Cameroon 🇨🇲", currency: "XAF", symbol: "FCFA", rate: 12, flutterwave: "XAF", minAmount: 1000, coins: 5},
     "SN": {name: "Senegal 🇸🇳", currency: "XOF", symbol: "CFA", rate: 12, flutterwave: "XOF", minAmount: 1000, coins: 5},
-    "CI": {name: "Ivory Coast 🇨🇮", currency: "XOF", symbol: "CFA", rate: 12, flutterwave: "XOF", minAmount: 1000, coins: 5}, // NEW - Same as Senegal
-    "BJ": {name: "Benin 🇧🇯", currency: "XOF", symbol: "CFA", rate: 12, flutterwave: "XOF", minAmount: 1000, coins: 5}, // NEW - Same as Senegal
-    "BW": {name: "Botswana 🇧🇼", currency: "BWP", symbol: "P", rate: 3.5, flutterwave: "BWP", minAmount: 100, coins: 5} // NEW - 20 Pula per coin
+    "CI": {name: "Ivory Coast 🇨🇮", currency: "XOF", symbol: "CFA", rate: 12, flutterwave: "XOF", minAmount: 1000, coins: 5},
+    "BJ": {name: "Benin 🇧🇯", currency: "XOF", symbol: "CFA", rate: 12, flutterwave: "XOF", minAmount: 1000, coins: 5},
+    "BW": {name: "Botswana 🇧🇼", currency: "BWP", symbol: "P", rate: 3.5, flutterwave: "BWP", minAmount: 100, coins: 5}
 };
 
 document.addEventListener("DOMContentLoaded", () => {
     Object.keys(AFRICAN_RATES).forEach(code => {
         const opt = document.createElement("option");
-        opt.value = code;
-        opt.textContent = AFRICAN_RATES[code].name;
-        countrySelect.appendChild(opt);
+        opt.value = AFRICAN_RATES[code].name;
+        opt.setAttribute("data-code", code);
+        countryList.appendChild(opt);
     });
 
     const savedId = localStorage.getItem("onewinId");
@@ -99,8 +99,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function toast(msg) {const t = document.getElementById("toast");t.innerHTML = msg;t.className = "show";setTimeout(() => t.className = "", 3500);}
 
-countrySelect.onchange = () => {
-    selectedCountry = countrySelect.value;
+countrySelect.oninput = () => {
+    const val = countrySelect.value;
+    const option = Array.from(countryList.options).find(opt => opt.value === val);
+    selectedCountry = option? option.getAttribute("data-code") : "";
+
     if(!selectedCountry) {
         coinRate.innerHTML = "";
         depositInput.placeholder = "Select country first";
