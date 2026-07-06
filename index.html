@@ -3,409 +3,263 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Deposit Coins - Dark Magic Ai Bot</title>
+<title>Buy Coins - Dark Magic Ai Bot</title>
 
 <link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
 
 <style>
-body {
-    background: black;
-    color: white;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding: 10px;
-}
-h1 {
-    font-family: 'UnifrakturCook', cursive;
-    font-size: 35px;
-    color: red;
-    margin-bottom: 5px;
-}
-input[type="number"], input[type="text"] {
-    width: 90%;
-    padding: 12px;
-    font-size: 18px;
-    margin-top: 10px;
-    border-radius: 8px;
-    border: none;
-}
-button {
-    width: 92%;
-    padding: 14px;
-    background: #e60000;
-    font-family: 'Poppins', sans-serif;
-    font-size: 18px;
-    color: #ffffff;
-    font-weight: 600;
-    border-radius: 10px;
-    border: none;
-    margin-top: 12px;
-    cursor: pointer;
-    letter-spacing: 0.5px;
-    transition: 0.3s ease-in-out;
-    box-shadow: 0 0 18px rgba(255, 0, 0, 0.7);
-}
-button:hover {
-    box-shadow: 0 0 25px rgba(255, 0, 0, 1);
-}
-#toast {
-    visibility: hidden;
-    min-width: 240px;
-    background-color: red;
-    font-family: 'Poppins', sans-serif;
-    color: black;
-    text-align: center;
-    border-radius: 10px;
-    padding: 12px;
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 18px;
-    z-index: 99999;
-    opacity: 0;
-    transition: opacity 0.3s, bottom 0.3s;
-}
-#toast.show {
-    visibility: visible;
-    opacity: 1;
-    bottom: 50px;
-}
-#depositStatus {
-    margin-top: 15px;
-    font-size: 18px;
-    color: yellow;
-}
-#coinRate {
-    font-size: 16px;
-    color: cyan;
-    margin-top: 5px;
-}
+body {background: #000;color: white;font-family: 'Poppins', sans-serif;text-align: center;padding: 15px;}
+h1 {font-family: 'UnifrakturCook', cursive;font-size: 38px;color: #ff1a1a;margin-bottom: 8px;text-shadow: 0 0 10px rgba(255,0,0,0.5);}
+.input-group {margin: 15px 0;text-align: left;width: 92%;margin-left: auto;margin-right: auto;}
+label {font-size: 14px;color: #aaa;margin-bottom: 5px;display: block;}
+.warn-text {font-size: 12px;color: #ffdd00;margin-top: -8px;margin-bottom: 8px;display: block;}
+input[type="number"], input[type="text"] {width: 100%;padding: 14px;font-size: 16px;border-radius: 10px;border: 2px solid #333;background: #111;color: white;box-sizing: border-box;}
+.glass-btn {width: 92%;padding: 15px;background: rgba(255, 0, 0, 0.15);backdrop-filter: blur(12px);border: 1px solid rgba(255, 0, 0, 0.4);font-size: 18px;color: #ffffff;font-weight: 700;border-radius: 15px;margin-top: 15px;cursor: pointer;box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);}
+#toast {visibility: hidden;min-width: 260px;background-color: #ff1a1a;color: white;text-align: center;border-radius: 12px;padding: 14px;position: fixed;bottom: 30px;left: 50%;transform: translateX(-50%);font-size: 16px;font-weight: 600;z-index: 99999;opacity: 0;transition: opacity 0.3s;}
+#toast.show {visibility: visible;opacity: 1;bottom: 50px;}
+#coinRate {font-size: 15px;color: #00e5ff;margin-top: 8px;font-weight: 600;}
+#depositStatus {margin-top: 12px;font-size: 15px;font-weight: 600;color: #00e5ff;}
 
-#refreshNotice {
-    font-size: 14px;
-    color: yellow;
-    margin-top: 12px;
-    font-weight: bold;
-    animation: blinkGlow 1s infinite alternate;
-}
-
-@keyframes blinkGlow {
-    0% {
-        opacity: 1;
-        text-shadow: 0 0 5px yellow, 0 0 10px orange;
-    }
-    100% {
-        opacity: 0.4;
-        text-shadow: 0 0 20px yellow, 0 0 30px red;
-    }
-}
-
-#historyBox {
-    margin-top: 25px;
-    text-align: left;
-}
-.history-item {
-    background: #111;
-    border-radius: 10px;
-    padding: 12px;
-    margin: 10px 0;
-    display: flex;
-    justify-content: space-between;
-    font-family: 'Poppins', sans-serif;
-}
-.history-left { text-align: left; }
-.history-right { text-align: right; }
-.history-title { color: lime; }
-.history-sub { font-size: 12px; color: #aaa; }
-.history-naira { color: cyan; font-size: 13px; }
-
-/* ADDED */
-#instructionModal {
-    display: none;
-    position: fixed;
-    z-index: 999999;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.9);
-}
-#instructionContent {
-    background: #111;
-    color: white;
-    margin: 10% auto;
-    padding: 20px;
-    width: 90%;
-    border-radius: 12px;
-    text-align: left;
-    font-family: 'Poppins', sans-serif;
-    max-height: 80%;
-    overflow-y: auto;
-}
-#instructionContent h2 {
-    text-align: center;
-    color: red;
-}
-.bold {
-    font-weight: bold;
-}
+/* CUSTOM DROPDOWN */
+.country-wrapper {position: relative;}
+#countryDisplay {width: 100%;padding: 14px;font-size: 16px;border-radius: 10px;border: 2px solid #333;background: #111;color: white;box-sizing: border-box;cursor: pointer;text-align: left;}
+#countryDropdown {display: none;position: absolute;top: 100%;left: 0;right: 0;background: #111;border: 2px solid #333;border-radius: 10px;margin-top: 5px;z-index: 1000;max-height: 250px;overflow-y: auto;}
+#countrySearch {width: 100%;padding: 12px;font-size: 15px;border: none;border-bottom: 1px solid #333;background: #000;color: white;box-sizing: border-box;border-radius: 10px 10px 0 0;outline: none;}
+.country-option {padding: 12px 14px;cursor: pointer;color: white;text-align: left;}
+.country-option:hover {background: rgba(255,0,0,0.15);}
+.country-option.hidden {display: none;}
 </style>
 </head>
 <body>
 
 <h1>Deposit Coins</h1>
+<p class="subtitle">Power up your Dark Magic Ai Bot</p>
 
-<input type="number" id="depositAmount" placeholder="Enter deposit amount (â¦)" min="1000" />
-<div id="coinRate">â¦200 = 1 coin</div>
-<button id="submitDepositBtn">ð° Buy Coins</button>
-
-<div id="depositStatus"></div>
-
-<div id="refreshNotice">â¡ Make sure to return back to the site immediately after payment â¡</div>
-
-<div id="historyBox">
-    <h3>ð Transactions</h3>
-    <div id="historyList"></div>
+<div class="input-group">
+    <label>Enter your 1WIN ID <span style="color:#ff1a1a;">*Required</span></label>
+    <span class="warn-text">⚠️ Note: Your 1Win ID only links you to the bot. Depositing here will NOT reflect in your 1Win account. Double check your ID, coins can be lost if wrong.</span>
+    <input type="text" id="onewinIdInput" placeholder="Enter your 1WIN ID" inputmode="numeric" pattern="[0-9]*" />
 </div>
 
-<div id="toast"></div>
-
-<!-- ADDED MODAL -->
-<div id="instructionModal">
-    <div id="instructionContent">
-        <h2 class="bold">HOW TO DEPOSIT</h2>
-
-        <p class="bold">READ THIS INSTRUCTION CAREFULLY TO AVOID COINS MISPLACE</p>
-
-        <p>1. You will be redirected to a payment page</p>
-
-        <p>2. If you donât use card payment, below you will see a change payment method text, 
-        <span class="bold">CLICK IT AND CHOOSE YOUR DESIRE PAYMENT METHOD</span></p>
-
-        <p>3. After sending the money to the account given to you, 
-        <span class="bold">COME BACK TO THE PAYMENT PAGE</span></p>
-
-        <p>4. Swipe Up (DO NOT REFRESH THE PAGE) and click on 
-        <span class="bold">I HAVE MADE THIS BANK TRANSFER (VERY IMPORTANT)</span></p>
-
-        <p class="bold">MAKE SURE YOU READ THIS BECAUSE YOU WILL BE ACCOUNTABLE FOR COIN LOSS AFTER PAYMENT</p>
-
-        <button id="agreeBtn">I HAVE READ AND UNDERSTOOD</button>
+<div class="input-group">
+    <label>Select Your African Country</label>
+    <div class="country-wrapper">
+        <div id="countryDisplay">-- Search and Select Country --</div>
+        <div id="countryDropdown">
+            <input type="text" id="countrySearch" placeholder="Search country..." />
+            <div id="countryOptions"></div>
+        </div>
     </div>
 </div>
 
+<div class="input-group">
+    <label id="amountLabel">Enter Deposit Amount</label>
+    <input type="number" id="depositAmount" placeholder="Select country first" min="1" step="any" />
+    <div id="coinRate"></div>
+</div>
+
+<button class="glass-btn" id="submitDepositBtn">💰 Buy Coins Now</button>
+<div id="depositStatus"></div>
+<div id="toast"></div>
+
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script src="https://checkout.flutterwave.com/v3.js"></script>
 
 <script>
-const firebaseConfig = {
-    apiKey: "AIzaSyDvFDByPPo9zgwKLdPaREz1OVMQCXmPfrs",
-    authDomain: "bets-d795d.firebaseapp.com",
-    projectId: "bets-d795d",
-    storageBucket: "bets-d795d.appspot.com",
-    messagingSenderId: "384386108287",
-    appId: "1:384386108287:android:d238a5ec8068d9bb9be84a",
-    databaseURL: "https://bets-d795d-default-rtdb.firebaseio.com"
-};
+const REPLIT_CREDIT_KEY = "WK-16c8aff1b67922fb3c46ed5b41a3e216";
 
+const firebaseConfig = {apiKey: "AIzaSyDvFDByPPo9zgwKLdPaREz1OVMQCXmPfrs",authDomain: "bets-d795d.firebaseapp.com",databaseURL: "https://bets-d795d-default-rtdb.firebaseio.com",projectId: "bets-d795d"};
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-
 const db = firebase.database();
 
-const depositStatus = document.getElementById("depositStatus");
-const submitBtn = document.getElementById("submitDepositBtn");
+const countryDisplay = document.getElementById("countryDisplay");
+const countryDropdown = document.getElementById("countryDropdown");
+const countrySearch = document.getElementById("countrySearch");
+const countryOptions = document.getElementById("countryOptions");
 const depositInput = document.getElementById("depositAmount");
-const historyList = document.getElementById("historyList");
+const amountLabel = document.getElementById("amountLabel");
+const coinRate = document.getElementById("coinRate");
+const onewinInput = document.getElementById("onewinIdInput");
+let selectedCountry = "", flutterwaveKey = null;
 
-function toast(msg) {
-    const t = document.getElementById("toast");
-    t.innerHTML = msg;
-    t.className = "show";
-    setTimeout(() => t.className = t.className.replace("show", ""), 3000);
-}
+const AFRICAN_RATES = {
+    "NG": {name: "Nigeria 🇳🇬", currency: "NGN", symbol: "₦", rate: 1, flutterwave: "NGN", minAmount: 1000, coins: 5},
+    "GH": {name: "Ghana 🇬🇭", currency: "GHS", symbol: "GH₵", rate: 0.045, flutterwave: "GHS", minAmount: 45, coins: 10},
+    "ZA": {name: "South Africa 🇿🇦", currency: "ZAR", symbol: "R", rate: 0.11, flutterwave: "ZAR", minAmount: 25, coins: 5},
+    "KE": {name: "Kenya 🇰🇪", currency: "KES", symbol: "KSh", rate: 2.3, flutterwave: "KES", minAmount: 200, coins: 5},
+    "UG": {name: "Uganda 🇺🇬", currency: "UGX", symbol: "USh", rate: 70, flutterwave: "UGX", minAmount: 3000, coins: 5},
+    "TZ": {name: "Tanzania 🇹🇿", currency: "TZS", symbol: "TSh", rate: 45, flutterwave: "TZS", minAmount: 2500, coins: 5},
+    "CM": {name: "Cameroon 🇨🇲", currency: "XAF", symbol: "FCFA", rate: 12, flutterwave: "XAF", minAmount: 1000, coins: 5},
+    "SN": {name: "Senegal 🇸🇳", currency: "XOF", symbol: "CFA", rate: 12, flutterwave: "XOF", minAmount: 1000, coins: 5},
+    "CI": {name: "Ivory Coast 🇨🇮", currency: "XOF", symbol: "CFA", rate: 12, flutterwave: "XOF", minAmount: 1000, coins: 5},
+    "BJ": {name: "Benin 🇧🇯", currency: "XOF", symbol: "CFA", rate: 12, flutterwave: "XOF", minAmount: 1000, coins: 5},
+    "BW": {name: "Botswana 🇧🇼", currency: "BWP", symbol: "P", rate: 3.5, flutterwave: "BWP", minAmount: 100, coins: 5},
+    "TG": {name: "Togo 🇹🇬", currency: "XOF", symbol: "CFA", rate: 12, flutterwave: "XOF", minAmount: 1000, coins: 5}, // NEW - Same as Senegal
+    "NE": {name: "Niger 🇳🇪", currency: "XOF", symbol: "CFA", rate: 12, flutterwave: "XOF", minAmount: 1000, coins: 5}, // NEW - Same as Senegal
+    "MW": {name: "Malawi 🇲🇼", currency: "MWK", symbol: "MK", rate: 80, flutterwave: "MWK", minAmount: 2000, coins: 5}, // NEW - 2000 MK for 5 coins
+    "ZM": {name: "Zambia 🇿🇲", currency: "ZMW", symbol: "ZK", rate: 5, flutterwave: "ZMW", minAmount: 25, coins: 5}, // NEW - 25 ZMW for 5 coins
+    "ZW": {name: "Zimbabwe 🇿🇼", currency: "ZWL", symbol: "ZiG", rate: 6, flutterwave: "ZWL", minAmount: 30, coins: 5} // NEW - 30 ZiG for 5 coins
+};
 
-/* =========================
-   ð¥ AFFILIATE SYSTEM (FIXED)
-========================= */
-function processAffiliate(userId, amountRaw, txId) {
-
-    db.ref("users/" + userId).once("value").then(userSnap => {
-        const userData = userSnap.val();
-        if (!userData || !userData.referredBy) return;
-
-        const refCode = userData.referredBy;
-
-        // prevent double payment
-        db.ref("processedAffiliates/" + txId).once("value").then(check => {
-            if (check.exists()) return;
-
-            // DIRECT LOOKUP (FAST + CLEAN)
-            db.ref("promoCodes/" + refCode).once("value").then(res => {
-                const referrerId = res.val();
-                if (!referrerId) return;
-
-                const commission = amountRaw * 0.30;
-
-                db.ref("users/" + referrerId + "/affiliateBalance")
-                    .transaction(v => (v || 0) + commission);
-
-                db.ref("users/" + referrerId + "/totalEarned")
-                    .transaction(v => (v || 0) + commission);
-
-                db.ref("users/" + referrerId + "/totalReferrals")
-                    .transaction(v => (v || 0) + 1);
-
-                db.ref("referrals").push({
-                    referrerId,
-                    referredId: userId,
-                    amount: amountRaw,
-                    commission,
-                    txId,
-                    time: Date.now()
-                });
-
-                db.ref("processedAffiliates/" + txId).set(true);
-            });
-        });
+document.addEventListener("DOMContentLoaded", () => {
+    // Build country list
+    Object.keys(AFRICAN_RATES).forEach(code => {
+        const div = document.createElement("div");
+        div.className = "country-option";
+        div.setAttribute("data-code", code);
+        div.textContent = AFRICAN_RATES[code].name;
+        div.onclick = () => selectCountry(code, AFRICAN_RATES[code].name);
+        countryOptions.appendChild(div);
     });
-}
 
-/* =========================
-   HISTORY
-========================= */
-firebase.auth().onAuthStateChanged(user => {
-    if (!user) return (window.location.href = "login.html");
+    const savedId = localStorage.getItem("onewinId");
+    if(savedId) onewinInput.value = savedId;
 
-    db.ref("users/" + user.uid + "/transactions").once("value").then(snap => {
-        historyList.innerHTML = "";
-        let arr = [];
-
-        snap.forEach(child => arr.push(child.val()));
-
-        arr.sort((a, b) => b.time - a.time);
-
-        arr.forEach(tx => {
-            if (tx.type === "deposit") {
-                const d = new Date(tx.time).toLocaleString();
-
-                historyList.innerHTML += `
-                <div class="history-item">
-                    <div class="history-left">
-                        <div class="history-title">+${tx.coins} Coins</div>
-                        <div class="history-sub">Ref: ${tx.ref}</div>
-                        <div class="history-sub">${d}</div>
-                    </div>
-                    <div class="history-right">
-                        <div>+${tx.coins}</div>
-                        <div class="history-naira">â¦${tx.amount}</div>
-                    </div>
-                </div>`;
-            }
-        });
-    });
+    checkPendingPayment();
 });
 
-/* =========================
-   FLUTTERWAVE
-========================= */
-let flutterwaveKey = null;
+function toast(msg) {const t = document.getElementById("toast");t.innerHTML = msg;t.className = "show";setTimeout(() => t.className = "", 3500);}
 
+// Open/Close dropdown
+countryDisplay.onclick = () => {
+    countryDropdown.style.display = countryDropdown.style.display === "block"? "none" : "block";
+    if(countryDropdown.style.display === "block") countrySearch.focus();
+}
+document.addEventListener("click", (e) => {
+    if(!e.target.closest(".country-wrapper")) countryDropdown.style.display = "none";
+})
+
+// Search filter
+countrySearch.oninput = () => {
+    const filter = countrySearch.value.toLowerCase();
+    document.querySelectorAll(".country-option").forEach(opt => {
+        opt.classList.toggle("hidden",!opt.textContent.toLowerCase().includes(filter));
+    })
+}
+
+function selectCountry(code, name) {
+    selectedCountry = code;
+    countryDisplay.textContent = name;
+    countryDropdown.style.display = "none";
+    countrySearch.value = "";
+
+    const c = AFRICAN_RATES[selectedCountry];
+    const coinPrice = Math.ceil(c.minAmount / c.coins);
+    amountLabel.innerHTML = `Enter Deposit Amount (${c.symbol})`;
+    depositInput.placeholder = `Min ${c.symbol}${c.minAmount}`;
+    depositInput.min = c.minAmount;
+    depositInput.value = "";
+    coinRate.innerHTML = `${c.symbol}${coinPrice} = 1 Coin | Min Deposit: ${c.symbol}${c.minAmount} = ${c.coins} Coins`;
+}
+
+function validateAmount(amount, countryCode) {
+    const c = AFRICAN_RATES[countryCode];
+    if(!c) return {valid: false, msg: "Select country first"};
+    if (amount < c.minAmount) return { valid: false, msg: `Minimum deposit is ${c.symbol}${c.minAmount}` };
+    const coins = Math.floor(amount / (c.minAmount / c.coins));
+    if (coins < c.coins) return { valid: false, msg: `Minimum ${c.coins} coins. Deposit at least ${c.symbol}${c.minAmount}` };
+    return { valid: true, coins };
+}
+
+async function creditCoinsViaReplit(buyer1winId, coins, paymentOrderId) {
+    try {
+        const response = await fetch("https://telegram-guard.replit.app/api/onewin/credit", {
+            method: "POST",
+            headers: {"Content-Type": "application/json","X-Credit-Key": REPLIT_CREDIT_KEY},
+            body: JSON.stringify({registration_id: buyer1winId,coins: coins,order_id: paymentOrderId})
+        });
+        return await response.json();
+    } catch(e) {return {success: false, message: "Server connection error"};}
+}
+
+async function verifyAndCredit(buyer1winId, coins, tx_ref) {
+    document.getElementById("depositStatus").innerHTML = "⏳ Verifying payment...";
+    const result = await creditCoinsViaReplit(buyer1winId, coins, tx_ref);
+    if (result.success) {
+        await db.ref("public_transactions").push({
+            type: "deposit", coins: coins, ref: tx_ref, time: Date.now(), onewinId: buyer1winId
+        });
+
+        localStorage.removeItem("lastPayment");
+        document.getElementById("depositStatus").innerHTML = "";
+        toast(`✅ +${coins} Coins Credited! Check your bot balance.`);
+        setTimeout(() => { window.location.href = "index.html"; }, 2500);
+    } else {
+        document.getElementById("depositStatus").innerHTML = "";
+        toast(`❌ ${result.message || result.error || "Crediting failed. Contact support."}`);
+    }
+}
+
+function checkPendingPayment() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const status = urlParams.get("status");
+    const tx_ref = urlParams.get("tx_ref");
+    const saved = JSON.parse(localStorage.getItem("lastPayment") || "{}");
+
+    if (status && tx_ref && saved.tx_ref === tx_ref) {
+        if (status === "successful" || status === "completed") {
+            verifyAndCredit(saved.buyer1winId, saved.coins, saved.tx_ref);
+        } else {
+            localStorage.removeItem("lastPayment");
+            toast("Payment was not completed");
+        }
+    }
+}
+
+// LOAD FLUTTERWAVE KEY WITH ERROR CHECK
 db.ref("settings/flutterwaveKeys/public").once("value").then(snap => {
     flutterwaveKey = snap.val() || "";
+    if(!flutterwaveKey) {
+        toast("⚠️ Payment key failed to load. Check Firebase Rules");
+        console.log("Flutterwave key is null");
+    }
+}).catch(err => {
+    toast("⚠️ Cannot read payment key. Check Firebase Rules");
+    console.error(err);
 });
 
-function validateAmount(amount) {
-    const min = 1000;
-    const rate = 200;
+async function startPayment(amountRaw, coins, countryCode, buyer1winId) {
+    const c = AFRICAN_RATES[countryCode];
+    let payment_options = "card";
+    if(countryCode === "NG") payment_options = "card, banktransfer, ussd";
+    const tx_ref = "DM-" + Date.now();
 
-    if (amount < min)
-        return { valid: false, msg: `Minimum deposit is â¦${min}` };
+    const randomNum = Math.floor(Math.random() * 90000) + 10000;
+    const guestEmail = `guest${randomNum}@darkmagic.ai`;
 
-    if (amount % rate !== 0)
-        return { valid: false, msg: `Enter a multiple of â¦${rate}` };
+    localStorage.setItem("onewinId", buyer1winId);
+    localStorage.setItem("lastPayment", JSON.stringify({tx_ref, coins, amountRaw, countryCode, buyer1winId}));
 
-    return { valid: true, coins: amount / rate };
-}
-
-function startPayment(user, amountRaw, coins) {
     FlutterwaveCheckout({
         public_key: flutterwaveKey,
-        tx_ref: "TX-" + Date.now(),
+        tx_ref: tx_ref,
         amount: amountRaw,
-        currency: "NGN",
-        payment_options: "card, banktransfer, ussd",
-        customer: { email: user.email },
-
-        callback: function (response) {
-
-            const txId = response.transaction_id;
-            if (!txId) return toast("Payment not completed");
-
-            const userRef = db.ref("users/" + user.uid);
-
-            db.ref("processedPayments/" + txId).once("value").then(snap => {
-
-                if (!snap.exists()) {
-
-                    if (response.status === "successful" || response.status === "completed") {
-
-                        db.ref("processedPayments/" + txId).set(true);
-
-                        userRef.child("balance").transaction(v => (v || 0) + coins);
-
-                        userRef.child("transactions").push({
-                            type: "deposit",
-                            coins,
-                            amount: amountRaw,
-                            ref: txId,
-                            time: Date.now()
-                        });
-
-                        // â AFFILIATE TRIGGER
-                        processAffiliate(user.uid, amountRaw, txId);
-
-                        toast("Payment successful!");
-                        depositStatus.innerHTML = `Coins added: ${coins}`;
-                    }
-                }
-
-                setTimeout(() => {
-                    window.location.href = "maining.html";
-                }, 1500);
-            });
+        currency: c.flutterwave,
+        payment_options: payment_options,
+        redirect_url: window.location.href.split("?")[0],
+        customer: { email: guestEmail },
+        callback: async function (response) {
+            if (response.status === "successful" || response.status === "completed") {
+                await verifyAndCredit(buyer1winId, coins, tx_ref);
+            }
         },
-
-        onclose: () => toast("Payment cancelled")
+        onclose: () => toast("Payment window closed")
     });
 }
 
-/* =========================
-   BUTTON
-========================= */
-submitBtn.onclick = () => {
-    const user = firebase.auth().currentUser;
-    if (!user) return toast("Please login again");
-
+document.getElementById("submitDepositBtn").onclick = () => {
+    const buyer1winId = onewinInput.value.trim();
+    if (!buyer1winId) return toast("Please enter your 1Win ID");
+    if (!selectedCountry) return toast("Please select your country");
     const amountRaw = Number(depositInput.value);
-    if (!amountRaw) return toast("Enter valid amount");
-
-    const check = validateAmount(amountRaw);
+    if (!amountRaw || amountRaw <= 0) return toast("Enter a valid amount");
+    const check = validateAmount(amountRaw, selectedCountry);
     if (!check.valid) return toast(check.msg);
-
-    if (!flutterwaveKey) return toast("Payment key not loaded");
-
-    document.getElementById("instructionModal").style.display = "block";
-
-    document.getElementById("agreeBtn").onclick = function () {
-        document.getElementById("instructionModal").style.display = "none";
-        startPayment(user, amountRaw, check.coins);
-    };
+    if (!flutterwaveKey) return toast("Payment key not loaded. Refresh page.");
+    startPayment(amountRaw, check.coins, selectedCountry, buyer1winId);
 };
 </script>
-
 </body>
 </html>
